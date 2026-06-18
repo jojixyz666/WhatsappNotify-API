@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WA-Notify | WhatsApp Notification Microservice</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* Base Theme Colors */
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.1);
+      --green-text: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.1);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.1);
+      --blue-text: #3b82f6;
+      --mono: 'Courier New', monospace;
+
+      /* Hosting Environment Variable Fallbacks (Clean Dark Theme) */
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --color-text-primary: #f3f4f6;
+      --color-text-secondary: #9ca3af;
+      --color-text-tertiary: #6b7280;
+      --color-background-primary: #111827;
+      --color-background-secondary: #090d16;
+      --color-border-secondary: rgba(255, 255, 255, 0.1);
+      --color-border-tertiary: rgba(255, 255, 255, 0.06);
+      --border-radius-lg: 12px;
+      --border-radius-md: 8px;
+    }
+
+    html {
+      background-color: var(--color-background-secondary);
+    }
+
+    body {
+      font-family: var(--font-sans), sans-serif;
+      color: var(--color-text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 800px;
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      background: var(--color-background-primary);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      border-bottom: 0.5px solid var(--color-border-tertiary);
+      background: var(--color-background-primary);
+    }
+
+    .brand {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--color-text-primary);
+    }
+
+    .brand i {
+      color: var(--green);
+      font-size: 18px;
+    }
+
+    .brand span {
+      opacity: .45;
+      font-weight: 400;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-left: auto;
+      background: var(--color-background-secondary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      padding: 3px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      font-family: inherit;
+      transition: all .15s;
+    }
+
+    .tab-btn:hover {
+      color: var(--color-text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      border: 0.5px solid var(--color-border-tertiary);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge.ok {
+      background: var(--green-bg);
+      color: var(--green-text);
+    }
+
+    .badge.warn {
+      background: var(--amber-bg);
+      color: var(--amber);
+    }
+
+    .badge.err {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+    }
+
+    .badge.scan {
+      background: var(--blue-bg);
+      color: var(--blue-text);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    .body-area {
+      background: var(--color-background-primary);
+    }
+
+    .pane {
+      padding: 28px 28px 24px;
+      display: none;
+    }
+
+    .pane.active {
+      display: block;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--color-text-tertiary);
+      margin-bottom: 14px;
+    }
+
+    .connect-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+      padding: 20px;
+      background: var(--color-background-secondary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      margin-bottom: 20px;
+    }
+
+    .qr-area {
+      flex-shrink: 0;
+      width: 120px;
+      height: 120px;
+      background: var(--color-background-primary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .qr-area img {
+      width: 108px;
+      height: 108px;
+      border-radius: 4px;
+    }
+
+    .qr-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--color-text-tertiary);
+      font-size: 12px;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .qr-placeholder i {
+      font-size: 28px;
+    }
+
+    .connect-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .connect-info h3 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .connect-info p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      border: 0.5px solid var(--color-border-secondary);
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      transition: background .15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--color-background-secondary);
+    }
+
+    .btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .btn.danger {
+      color: var(--red);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    .btn.danger:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: var(--color-background-secondary);
+      border-radius: var(--border-radius-md);
+      padding: 14px 16px;
+    }
+
+    .stat .s-label {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .stat .s-val {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .stat .s-sub {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      margin-top: 2px;
+    }
+
+    fieldset {
+      border: none;
+    }
+
+    .fg {
+      margin-bottom: 14px;
+    }
+
+    .fg label {
+      display: block;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .fg input, .fg textarea {
+      width: 100%;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 8px 12px;
+      outline: none;
+      transition: border .15s;
+    }
+
+    .fg input:focus, .fg textarea:focus {
+      border-color: var(--blue);
+    }
+
+    .fg input:disabled, .fg textarea:disabled {
+      opacity: .45;
+    }
+
+    .fg textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+
+    .send-btn {
+      width: 100%;
+      padding: 9px;
+      border-radius: var(--border-radius-md);
+      border: none;
+      background: var(--green);
+      color: #090d16;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+      transition: opacity .15s;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      opacity: .88;
+    }
+
+    .send-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .console {
+      background: var(--color-background-secondary);
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      max-height: 140px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+
+    .cl {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 3px;
+      line-height: 1.5;
+    }
+
+    .cl-time {
+      color: var(--color-text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .cl-msg.s { color: var(--green); }
+    .cl-msg.e { color: var(--red); }
+    .cl-msg.i { color: var(--color-text-secondary); }
+
+    .ep-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ep {
+      border: 0.5px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+    }
+
+    .ep-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--color-background-secondary);
+    }
+
+    .method {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .method.get {
+      background: var(--blue-bg);
+      color: var(--blue-text);
+      border: 0.5px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .method.post {
+      background: var(--green-bg);
+      color: var(--green-text);
+      border: 0.5px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .ep-path {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    .ep-body {
+      padding: 12px 14px;
+      border-top: 0.5px solid var(--color-border-tertiary);
+      background: var(--color-background-primary);
+    }
+
+    .ep-desc {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .ep-code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--color-background-secondary);
+      padding: 8px 10px;
+      border-radius: var(--border-radius-md);
+      color: var(--color-text-secondary);
+      border: 0.5px solid var(--color-border-tertiary);
+    }
+
+    .ti-loader-2 {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Toast */
+    #toast-bar {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 1000;
+      padding: 9px 14px;
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      border: 0.5px solid var(--color-border-tertiary);
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      animation: tabFadeIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 580px) {
+      .topbar {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .tabs {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+      }
+      body {
+        padding: 1rem 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h2 class="sr-only">WA-Notify — WhatsApp notification microservice dashboard</h2>
+
+<div class="shell">
+  <div class="topbar">
+    <div class="brand"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> WA-Notify <span>v1.0</span></div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="t-dash">Dashboard</button>
+      <button class="tab-btn" data-tab="t-console">Test console</button>
+      <button class="tab-btn" data-tab="t-api">API reference</button>
+    </div>
+    <div id="nav-badge" class="badge err"><span class="dot"></span> Disconnected</div>
+  </div>
+
+  <div class="body-area">
+
+    <!-- Dashboard -->
+    <div id="t-dash" class="pane active">
+      <p class="section-label">Connection</p>
+      <div class="connect-row">
+        <div class="qr-area" id="qr-area">
+          <div class="qr-placeholder">
+            <i class="ti ti-qrcode" aria-hidden="true"></i>
+            <span id="qr-msg">Initializing…</span>
+          </div>
+        </div>
+        <div class="connect-info">
+          <h3 id="conn-title">Connecting to WhatsApp</h3>
+          <p id="conn-desc">Checking session state. This may take a moment.</p>
+          <div class="btn-row">
+            <button id="btn-logout" class="btn danger" disabled>
+              <i class="ti ti-unlink" aria-hidden="true"></i> Disconnect
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label">Session metrics</p>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="s-label">Status</div>
+          <div class="s-val" id="m-status" style="font-size:15px;margin-top:4px">—</div>
+        </div>
+        <div class="stat">
+          <div class="s-label">Messages sent</div>
+          <div class="s-val" id="m-sent">0</div>
+          <div class="s-sub">this session</div>
+        </div>
+        <div class="stat">
+          <div class="s-label">Last activity</div>
+          <div class="s-val" id="m-time" style="font-size:15px;margin-top:4px">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Console -->
+    <div id="t-console" class="pane">
+      <p class="section-label">Send test notification</p>
+      <fieldset id="send-form">
+        <div class="fg">
+          <label>Phone number</label>
+          <input id="input-to" type="text" placeholder="628xxxxxxxxxx" disabled />
+        </div>
+        <div class="fg">
+          <label>Message</label>
+          <textarea id="input-msg" placeholder="Message body…" disabled></textarea>
+        </div>
+        <button class="send-btn" id="btn-send" disabled>
+          <i class="ti ti-send" aria-hidden="true"></i> Send
+        </button>
+      </fieldset>
+      <div class="console" id="console-log">
+        <div class="cl"><span class="cl-time">[00:00:00]</span><span class="cl-msg i">System ready.</span></div>
+      </div>
+    </div>
+
+    <!-- API Reference -->
+    <div id="t-api" class="pane">
+      <p class="section-label">Endpoints</p>
+      <div class="ep-list">
+        <div class="ep">
+          <div class="ep-head"><span class="method get">GET</span><span class="ep-path">/api/whatsapp/status</span></div>
+          <div class="ep-body">
+            <p class="ep-desc">Returns current connection state. Possible values: <code>CONNECTED</code>, <code>CONNECTING</code>, <code>DISCONNECTED</code>, <code>SCAN_QR</code>.</p>
+            <div class="ep-code">{ "status": "CONNECTED" }</div>
+          </div>
+        </div>
+        <div class="ep">
+          <div class="ep-head"><span class="method post">POST</span><span class="ep-path">/api/whatsapp/send</span></div>
+          <div class="ep-body">
+            <p class="ep-desc">Send a text notification via JSON body.</p>
+            <div class="ep-code">{ "to": "628123456789", "message": "Hello!" }</div>
+          </div>
+        </div>
+        <div class="ep">
+          <div class="ep-head"><span class="method get">GET</span><span class="ep-path">/api/whatsapp/send</span></div>
+          <div class="ep-body">
+            <p class="ep-desc">Send via URL query string — useful for quick integrations and webhooks without a request body.</p>
+            <div class="ep-code">?to=628123456789&message=Hello+World</div>
+          </div>
+        </div>
+        <div class="ep">
+          <div class="ep-head"><span class="method post">POST</span><span class="ep-path">/api/whatsapp/webhook</span></div>
+          <div class="ep-body">
+            <p class="ep-desc">Generic webhook receiver. Auto-decodes alerts from Grafana, Uptime Kuma, Netdata, etc. Falls back to <code>DEFAULT_RECIPIENT</code> env if <code>to</code> is omitted.</p>
+            <div class="ep-code">Supported body keys: to, phone, message, msg, text, content, title</div>
+          </div>
+        </div>
+        <div class="ep">
+          <div class="ep-head"><span class="method get">GET</span><span class="ep-path">/api/whatsapp/qr</span></div>
+          <div class="ep-body">
+            <p class="ep-desc">Returns base64 QR image when session is in <code>SCAN_QR</code> state.</p>
+            <div class="ep-code">{ "qr": "data:image/png;base64,..." }</div>
+          </div>
+        </div>
+        <div class="ep">
+          <div class="ep-head"><span class="method post">POST</span><span class="ep-path">/api/whatsapp/logout</span></div>
+          <div class="ep-body">
+            <p class="ep-desc">Clears session credentials and restarts the connection flow.</p>
+            <div class="ep-code">{ "success": true }</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast-bar" style="display:none;margin-top:10px;"></div>
+
+<script>
+let status='DISCONNECTED',sentCount=0;
+const navBadge=document.getElementById('nav-badge');
+const qrArea=document.getElementById('qr-area');
+const qrMsg=document.getElementById('qr-msg');
+const connTitle=document.getElementById('conn-title');
+const connDesc=document.getElementById('conn-desc');
+const btnLogout=document.getElementById('btn-logout');
+const mStatus=document.getElementById('m-status');
+const mSent=document.getElementById('m-sent');
+const mTime=document.getElementById('m-time');
+const inputTo=document.getElementById('input-to');
+const inputMsg=document.getElementById('input-msg');
+const btnSend=document.getElementById('btn-send');
+const logEl=document.getElementById('console-log');
+const toastBar=document.getElementById('toast-bar');
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+function ts(){return new Date().toTimeString().split(' ')[0]}
+
+function log(txt,type='i'){
+  const d=document.createElement('div');d.className='cl';
+  d.innerHTML=`<span class="cl-time">[${ts()}]</span><span class="cl-msg ${type}">${txt}</span>`;
+  logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;
+}
+
+let toastTimeout;
+function toast(msg,ok=true){
+  clearTimeout(toastTimeout);
+  toastBar.style.display='flex';
+  toastBar.innerHTML=`<i class="ti ti-${ok?'circle-check':'alert-circle'}" style="color:${ok?'var(--green)':'var(--red)'}"></i> ${msg}`;
+  toastTimeout=setTimeout(()=>{toastBar.style.display='none';},3000);
+}
+
+function setBadge(el,label,cls){
+  el.className=`badge ${cls}`;
+  el.innerHTML=`<span class="dot"></span> ${label}`;
+}
+
+function applyStatus(s){
+  if(status===s)return;status=s;
+  const now=new Date().toLocaleTimeString();
+  mTime.textContent=now;
+  if(s==='CONNECTED'){
+    setBadge(navBadge,'Connected','ok');
+    mStatus.textContent='Connected';
+    connTitle.textContent='Session active';
+    connDesc.textContent='WhatsApp is paired and ready to send notifications.';
+    qrArea.innerHTML='<i class="ti ti-circle-check" style="font-size:36px;color:var(--green)" aria-hidden="true"></i>';
+    btnLogout.disabled=false;
+    inputTo.disabled=false;inputMsg.disabled=false;btnSend.disabled=false;
+    log('Connected. Session is active.','s');
+  } else if(s==='SCAN_QR'){
+    setBadge(navBadge,'Scan QR','scan');
+    mStatus.textContent='Scan QR';
+    connTitle.textContent='Action required';
+    connDesc.textContent='Open WhatsApp → Linked Devices → scan the QR code on the left.';
+    btnLogout.disabled=true;
+    inputTo.disabled=true;inputMsg.disabled=true;btnSend.disabled=true;
+    fetchQR();
+    log('Waiting for QR scan.','i');
+  } else if(s==='CONNECTING'){
+    setBadge(navBadge,'Connecting…','warn');
+    mStatus.textContent='Connecting';
+    connTitle.textContent='Initializing session';
+    connDesc.textContent='Attempting to restore or establish a WhatsApp session.';
+    qrArea.innerHTML='<div class="qr-placeholder"><i class="ti ti-loader-2" aria-hidden="true" style="font-size:28px"></i><span>Please wait…</span></div>';
+    btnLogout.disabled=true;
+    inputTo.disabled=true;inputMsg.disabled=true;btnSend.disabled=true;
+  } else {
+    setBadge(navBadge,'Disconnected','err');
+    mStatus.textContent='Disconnected';
+    connTitle.textContent='Not connected';
+    connDesc.textContent='The service is offline or credentials have been cleared.';
+    qrArea.innerHTML='<div class="qr-placeholder"><i class="ti ti-wifi-off" aria-hidden="true" style="font-size:28px"></i><span>Offline</span></div>';
+    btnLogout.disabled=true;
+    inputTo.disabled=true;inputMsg.disabled=true;btnSend.disabled=true;
+  }
+}
+
+async function checkStatus(){
+  try{
+    const r=await fetch('/api/whatsapp/status');
+    const d=await r.json();
+    applyStatus(d.status);
+  }catch{applyStatus('DISCONNECTED');}
+}
+
+async function fetchQR(){
+  if(status!=='SCAN_QR')return;
+  try{
+    const r=await fetch('/api/whatsapp/qr');
+    const d=await r.json();
+    if(d.qr){qrArea.innerHTML=`<img src="${d.qr}" alt="QR code for WhatsApp pairing">`;}
+  }catch{}
+}
+
+btnSend.addEventListener('click',async()=>{
+  const to=inputTo.value.trim();
+  const msg=inputMsg.value.trim();
+  if(!to||!msg)return;
+  btnSend.disabled=true;
+  log(`Sending to ${to}…`,'i');
+  try{
+    const r=await fetch('/api/whatsapp/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to,message:msg})});
+    const d=await r.json();
+    if(r.ok&&d.success){
+      sentCount++;mSent.textContent=sentCount;
+      log(`Delivered. ID: ${d.data?.id}`,'s');
+      toast('Message sent.',true);
+      inputMsg.value='';
+    }else{
+      log(`Error: ${d.error}`,'e');
+      toast(d.error||'Send failed.',false);
+    }
+  }catch{
+    log('Network error.','e');
+    toast('Network error.',false);
+  }finally{btnSend.disabled=false;}
+});
+
+btnLogout.addEventListener('click',async()=>{
+  if(!confirm('Clear session and disconnect?'))return;
+  btnLogout.disabled=true;
+  log('Clearing session…','i');
+  try{
+    const r=await fetch('/api/whatsapp/logout',{method:'POST'});
+    const d=await r.json();
+    if(r.ok&&d.success){log('Session cleared.','s');toast('Logged out.',true);checkStatus();}
+    else{log('Logout failed.','e');btnLogout.disabled=false;}
+  }catch{log('Network error during logout.','e');btnLogout.disabled=false;}
+});
+
+setInterval(checkStatus,3000);
+setInterval(fetchQR,5000);
+checkStatus();
+</script>
+</body>
+</html>
