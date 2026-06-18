@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/Baileys-v7-25D366?logo=whatsapp&logoColor=white" alt="Baileys" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white" alt="Node.js" />
-  <img src="https://img.shields.io/badge/License-UNLICENSED-lightgrey" alt="License" />
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey" alt="License" />
 </p>
 
 ---
