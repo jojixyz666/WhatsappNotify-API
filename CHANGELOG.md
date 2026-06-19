@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.0] — 2026-06-20
+
+### Added
+
+#### Authentication & Security
+- **Admin Registration & Login**: Added endpoints (`POST /api/auth/register`, `POST /api/auth/login`) to register and authenticate administrator users.
+- **Strict Password Policy**: Implemented server-side complexity checks requiring passwords to be at least 8 characters long, containing a mixture of uppercase, lowercase, numbers, and symbols.
+- **HMAC Token Signing**: Custom JWT-like token generation using Node.js `crypto` with HMAC-SHA256 signature verification.
+- **API Key Bypass**: Added support for an optional `API_KEY` configuration in `.env` to allow external automated integrations (like Grafana, Uptime Kuma) to bypass user token auth.
+- **Local User Database**: Persisted admin credentials in `data/users.json` using scrypt hashing to survive container or WhatsApp session restarts.
+- **Route Protection**: Secured all `/api/whatsapp` controller endpoints under a new global `AuthGuard`.
+
+#### UI & Frontend
+- **Glassmorphic Login UI**: Added a premium glassmorphic overlay for logging in and registering.
+- **Interactive Password Checklist**: Added real-time visual checklist tracking length, casing, numbers, and symbols requirements.
+- **Session Logout**: Added a dashboard logout button to clear credentials from `localStorage`.
+- **Auto Onboarding**: Implemented check for existing users (`GET /api/auth/status`) to prompt for admin setup on clean installations.
+
+#### Deployment
+- **Dockerfile**: Added production multi-stage build setup to containerize the application.
+
+---
+
 ## [1.0.0] — 2026-06-18
 
 ### 🎉 Initial Release

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Query, HttpException, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, HttpException, HttpStatus, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
 import { WhatsappService } from './whatsapp.service';
 import { ConfigService } from '@nestjs/config';
 import { IsNotEmpty, IsString } from 'class-validator';
+import { AuthGuard } from '../auth/auth.guard';
 
 export class SendMessageDto {
   @IsNotEmpty({ message: 'Recipient number (to) is required' })
@@ -14,6 +15,7 @@ export class SendMessageDto {
 }
 
 @Controller('api/whatsapp')
+@UseGuards(AuthGuard)
 export class WhatsappController {
   constructor(
     private readonly whatsappService: WhatsappService,
