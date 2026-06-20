@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -15,11 +20,16 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(WhatsappService.name);
   private sock: WASocket | null = null;
   private qrCodeDataUrl: string | null = null;
-  private connectionStatus: 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'SCAN_QR' = 'DISCONNECTED';
+  private connectionStatus:
+    | 'DISCONNECTED'
+    | 'CONNECTING'
+    | 'CONNECTED'
+    | 'SCAN_QR' = 'DISCONNECTED';
   private sessionDir: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.sessionDir = this.configService.get<string>('WHATSAPP_SESSION_DIR') || 'sessions';
+    this.sessionDir =
+      this.configService.get<string>('WHATSAPP_SESSION_DIR') || 'sessions';
   }
 
   async onModuleInit() {
@@ -35,7 +45,7 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
   private async connectToWhatsApp() {
     try {
       const sessionPath = path.join(process.cwd(), this.sessionDir);
-      
+
       // Ensure session directory exists
       if (!fs.existsSync(sessionPath)) {
         fs.mkdirSync(sessionPath, { recursive: true });
@@ -62,7 +72,9 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
           this.connectionStatus = 'SCAN_QR';
           try {
             this.qrCodeDataUrl = await qrcode.toDataURL(qr);
-            this.logger.log('New QR Code generated. Scan via dashboard or terminal.');
+            this.logger.log(
+              'New QR Code generated. Scan via dashboard or terminal.',
+            );
           } catch (err) {
             this.logger.error('Failed to generate QR data URL', err);
           }
@@ -71,15 +83,19 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
         if (connection === 'close') {
           const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
           const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-          
-          this.logger.warn(`Connection closed. Status code: ${statusCode}. Reconnecting: ${shouldReconnect}`);
+
+          this.logger.warn(
+            `Connection closed. Status code: ${statusCode}. Reconnecting: ${shouldReconnect}`,
+          );
           this.qrCodeDataUrl = null;
           this.connectionStatus = 'DISCONNECTED';
 
           if (shouldReconnect) {
             this.connectToWhatsApp();
           } else {
-            this.logger.log('Logged out of WhatsApp. Cleaning up session data...');
+            this.logger.log(
+              'Logged out of WhatsApp. Cleaning up session data...',
+            );
             this.clearSessionData();
             this.connectToWhatsApp();
           }
@@ -118,7 +134,10 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
       try {
         await this.sock.logout();
       } catch (err) {
-        this.logger.warn('Error during socket logout (already logged out or disconnected)', err);
+        this.logger.warn(
+          'Error during socket logout (already logged out or disconnected)',
+          err,
+        );
       }
     }
     this.clearSessionData();
@@ -143,7 +162,8 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
 
   private formatNumber(to: string): string {
     let cleaned = to.replace(/\D/g, ''); // Remove non-digit characters
-    const defaultCountry = this.configService.get<string>('DEFAULT_COUNTRY_CODE') || '62';
+    const defaultCountry =
+      this.configService.get<string>('DEFAULT_COUNTRY_CODE') || '62';
 
     // If starting with 0, replace with default country code
     if (cleaned.startsWith('0')) {
@@ -164,13 +184,17 @@ export class WhatsappService implements OnModuleInit, OnModuleDestroy {
 
   async sendMessage(to: string, message: string) {
     if (this.connectionStatus !== 'CONNECTED' || !this.sock) {
-      throw new Error('WhatsApp client is not connected. Please scan the QR code first.');
+      throw new Error(
+        'WhatsApp client is not connected. Please scan the QR code first.',
+      );
     }
 
     const formattedTo = this.formatNumber(to);
     this.logger.log(`Sending message to ${formattedTo}...`);
-    
-    const response = await this.sock.sendMessage(formattedTo, { text: message });
+
+    const response = await this.sock.sendMessage(formattedTo, {
+      text: message,
+    });
     return {
       id: response?.key?.id,
       to: formattedTo,

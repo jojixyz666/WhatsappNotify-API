@@ -1,4 +1,11 @@
-import { Injectable, Logger, ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ConflictException,
+  BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -20,7 +27,9 @@ export class AuthService {
   constructor(private readonly configService: ConfigService) {
     this.dbPath = path.join(process.cwd(), 'data', 'users.json');
     // Read secret from env, or generate a persistent/temporary fallback
-    this.jwtSecret = this.configService.get<string>('JWT_SECRET') || 'fallback-secret-key-please-change';
+    this.jwtSecret =
+      this.configService.get<string>('JWT_SECRET') ||
+      'fallback-secret-key-please-change';
     this.loadUsers();
   }
 
@@ -89,10 +98,19 @@ export class AuthService {
   private verifyPassword(password: string, stored: string): boolean {
     const [salt, hash] = stored.split(':');
     const checkHash = crypto.scryptSync(password, salt, 64).toString('hex');
-    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(checkHash, 'hex'));
+    return crypto.timingSafeEqual(
+      Buffer.from(hash, 'hex'),
+      Buffer.from(checkHash, 'hex'),
+    );
   }
 
   async register(username: string, password: string): Promise<any> {
+    if (this.hasUsers()) {
+      throw new ForbiddenException(
+        'Registration is disabled. An administrator account already exists.',
+      );
+    }
+
     const normalizedUsername = username.trim().toLowerCase();
     if (!normalizedUsername) {
       throw new BadRequestException('Username is required.');
@@ -125,7 +143,10 @@ export class AuthService {
     };
   }
 
-  async login(username: string, password: string): Promise<{ access_token: string }> {
+  async login(
+    username: string,
+    password: string,
+  ): Promise<{ access_token: string }> {
     const normalizedUsername = username.trim().toLowerCase();
     const user = this.users.get(normalizedUsername);
 
@@ -147,8 +168,13 @@ export class AuthService {
     };
   }
 
-  private generateToken(payload: { username: string; expiresAt: number }): string {
-    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  private generateToken(payload: {
+    username: string;
+    expiresAt: number;
+  }): string {
+    const header = Buffer.from(
+      JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
+    ).toString('base64url');
     const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const signature = crypto
       .createHmac('sha256', this.jwtSecret)
@@ -169,7 +195,9 @@ export class AuthService {
     if (signature !== expectedSignature) return null;
 
     try {
-      const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+      const payload = JSON.parse(
+        Buffer.from(body, 'base64url').toString('utf8'),
+      );
       if (payload.expiresAt < Date.now()) {
         return null; // Expired
       }

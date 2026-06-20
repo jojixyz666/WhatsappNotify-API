@@ -1,4 +1,11 @@
-import { Controller, Post, Get, Body, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { IsNotEmpty, IsString } from 'class-validator';
 

@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **API Key Bypass**: Added support for an optional `API_KEY` configuration in `.env` to allow external automated integrations (like Grafana, Uptime Kuma) to bypass user token auth.
 - **Local User Database**: Persisted admin credentials in `data/users.json` using scrypt hashing to survive container or WhatsApp session restarts.
 - **Route Protection**: Secured all `/api/whatsapp` controller endpoints under a new global `AuthGuard`.
+- **Single Admin Restriction**: Enforced a single administrator constraint. After the initial account is created, registration is permanently disabled on the backend and frontend for security.
 
 #### UI & Frontend
 - **Glassmorphic Login UI**: Added a premium glassmorphic overlay for logging in and registering.

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Query, HttpException, HttpStatus, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  HttpException,
+  HttpStatus,
+  UsePipes,
+  ValidationPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { WhatsappService } from './whatsapp.service';
 import { ConfigService } from '@nestjs/config';
 import { IsNotEmpty, IsString } from 'class-validator';
@@ -33,7 +44,8 @@ export class WhatsappController {
     if (!qrData.qr) {
       return {
         qr: null,
-        message: 'No QR code available. Client might be connected or initializing.',
+        message:
+          'No QR code available. Client might be connected or initializing.',
       };
     }
     return qrData;
@@ -81,7 +93,8 @@ export class WhatsappController {
       throw new HttpException(
         {
           success: false,
-          error: 'Recipient number (to) query parameter is required (or set DEFAULT_RECIPIENT in .env)',
+          error:
+            'Recipient number (to) query parameter is required (or set DEFAULT_RECIPIENT in .env)',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -91,14 +104,18 @@ export class WhatsappController {
       throw new HttpException(
         {
           success: false,
-          error: 'Message text is required via "message" or "msg" query parameter',
+          error:
+            'Message text is required via "message" or "msg" query parameter',
         },
         HttpStatus.BAD_REQUEST,
       );
     }
 
     try {
-      const result = await this.whatsappService.sendMessage(recipient, textContent);
+      const result = await this.whatsappService.sendMessage(
+        recipient,
+        textContent,
+      );
       return {
         success: true,
         message: 'Message queued/sent successfully',
@@ -121,17 +138,20 @@ export class WhatsappController {
    * Automatically attempts to parse message contents from typical payload structures.
    */
   @Post('webhook')
-  async handleWebhook(
-    @Body() body: any,
-    @Query('to') queryTo?: string,
-  ) {
-    const to = queryTo || body?.to || body?.phone || body?.number || this.configService.get<string>('DEFAULT_RECIPIENT');
+  async handleWebhook(@Body() body: any, @Query('to') queryTo?: string) {
+    const to =
+      queryTo ||
+      body?.to ||
+      body?.phone ||
+      body?.number ||
+      this.configService.get<string>('DEFAULT_RECIPIENT');
 
     if (!to) {
       throw new HttpException(
         {
           success: false,
-          error: 'Recipient number (to) is required. Provide it as query param (?to=...), inside body JSON, or set DEFAULT_RECIPIENT in .env.',
+          error:
+            'Recipient number (to) is required. Provide it as query param (?to=...), inside body JSON, or set DEFAULT_RECIPIENT in .env.',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -143,9 +163,14 @@ export class WhatsappController {
       message = body;
     } else if (body) {
       // Common alert keys (message, msg, text, body, content, or for Grafana: title/message/commonAnnotations)
-      message = body.message || body.msg || body.text || body.body || body.content || 
-                (body.title ? `${body.title}\n${body.message || ''}` : null) ||
-                JSON.stringify(body);
+      message =
+        body.message ||
+        body.msg ||
+        body.text ||
+        body.body ||
+        body.content ||
+        (body.title ? `${body.title}\n${body.message || ''}` : null) ||
+        JSON.stringify(body);
     }
 
     if (!message) {
@@ -182,7 +207,8 @@ export class WhatsappController {
       await this.whatsappService.logout();
       return {
         success: true,
-        message: 'Logged out successfully, session cleared and connection re-initialized.',
+        message:
+          'Logged out successfully, session cleared and connection re-initialized.',
       };
     } catch (error) {
       throw new HttpException(

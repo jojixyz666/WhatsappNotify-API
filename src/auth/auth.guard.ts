@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 
@@ -11,7 +16,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    
+
     // 1. Check API Key for external webhook / sending integrations
     const configuredApiKey = this.configService.get<string>('API_KEY');
     if (configuredApiKey) {
@@ -50,11 +55,15 @@ export class AuthGuard implements CanActivate {
     // to dashboard status checks so that they can register the first account.
     // However, sending messages or doing critical actions should be protected.
     const hasUsers = this.authService.hasUsers();
-    const isPublicInitRoute = request.url === '/api/whatsapp/status' || request.url.includes('/api/whatsapp/status');
+    const isPublicInitRoute =
+      request.url === '/api/whatsapp/status' ||
+      request.url.includes('/api/whatsapp/status');
     if (!hasUsers && !configuredApiKey && isPublicInitRoute) {
       return true;
     }
 
-    throw new UnauthorizedException('Access denied. Valid Bearer Token or API Key required.');
+    throw new UnauthorizedException(
+      'Access denied. Valid Bearer Token or API Key required.',
+    );
   }
 }
