@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Interactive Password Checklist**: Added real-time visual checklist tracking length, casing, numbers, and symbols requirements.
 - **Session Logout**: Added a dashboard logout button to clear credentials from `localStorage`.
 - **Auto Onboarding**: Implemented check for existing users (`GET /api/auth/status`) to prompt for admin setup on clean installations.
+- **Registration Toggle Control**: Disabled manual registration toggling by default to align with the single admin restriction.
 
 #### Deployment
 - **Dockerfile**: Added production multi-stage build setup to containerize the application.
