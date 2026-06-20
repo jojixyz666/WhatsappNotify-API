@@ -34,6 +34,10 @@ This microservice uses the **WhatsApp Multi-Device** protocol via the [Baileys](
 - 💾 **Persistent Session** — Session is saved on disk, no need to rescan the QR code on every restart.
 - 📱 **Smart Number Format** — Automatically formats local numbers to international format.
 
+### 🎥 Video Guide & Demo
+
+[![Watch the video](https://img.youtube.com/vi/e7dqNKeSjbQ/maxresdefault.jpg)](https://youtu.be/e7dqNKeSjbQ)
+
 ---
 
 ## 🛠️ Tech Stack
