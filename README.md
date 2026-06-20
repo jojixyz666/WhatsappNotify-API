@@ -5,7 +5,7 @@
 <h1 align="center">WA-Notify</h1>
 
 <p align="center">
-  Self-hosted WhatsApp Notification Microservice — kirim notifikasi WhatsApp dari sistem apapun via REST API.
+  Self-hosted WhatsApp Notification Microservice — send WhatsApp notifications from any system via REST API.
 </p>
 
 <p align="center">
@@ -18,37 +18,37 @@
 
 ---
 
-## 📖 Tentang Project
+## 📖 About the Project
 
-**WA-Notify** adalah microservice WhatsApp notification yang berjalan secara self-hosted. Project ini memungkinkan kamu mengirim pesan WhatsApp secara otomatis melalui REST API — cocok untuk integrasi dengan sistem monitoring (Grafana, Uptime Kuma, Netdata), CI/CD pipeline, IoT devices, cron jobs, atau aplikasi apapun yang bisa melakukan HTTP request.
+**WA-Notify** is a self-hosted WhatsApp notification microservice. This project allows you to send WhatsApp messages automatically via a REST API — perfect for integration with monitoring systems (Grafana, Uptime Kuma, Netdata), CI/CD pipelines, IoT devices, cron jobs, or any application that can perform an HTTP request.
 
-Microservice ini menggunakan protokol **WhatsApp Multi-Device** melalui library [Baileys](https://github.com/WhiskeySockets/Baileys), sehingga **tidak memerlukan WhatsApp Business API berbayar**. Cukup scan QR code dengan akun WhatsApp pribadi, dan microservice siap digunakan.
+This microservice uses the **WhatsApp Multi-Device** protocol via the [Baileys](https://github.com/WhiskeySockets/Baileys) library, so it **does not require a paid WhatsApp Business API**. Simply scan the QR code with a personal WhatsApp account, and the microservice is ready to use.
 
-### Fitur Utama
+### Key Features
 
-- 🔗 **WhatsApp Multi-Device** — Terhubung ke WhatsApp tanpa perlu HP selalu online.
-- 📡 **REST API** — Kirim pesan via `POST` (JSON body) atau `GET` (query string).
-- 🪝 **Webhook Receiver** — Terima alert dari Grafana, Uptime Kuma, Netdata, dll secara otomatis.
-- 🖥️ **Web Dashboard** — Kelola koneksi, scan QR, kirim test message, dan lihat API docs langsung dari browser.
-- 🔄 **Auto-Reconnect** — Koneksi otomatis pulih jika terputus.
-- 💾 **Persistent Session** — Session tersimpan di disk, tidak perlu scan QR ulang setiap restart.
-- 📱 **Smart Number Format** — Otomatis format nomor lokal ke format internasional.
+- 🔗 **WhatsApp Multi-Device** — Connect to WhatsApp without needing your phone to stay online.
+- 📡 **REST API** — Send messages via `POST` (JSON body) or `GET` (query string).
+- 🪝 **Webhook Receiver** — Receive alerts from Grafana, Uptime Kuma, Netdata, etc. automatically.
+- 🖥️ **Web Dashboard** — Manage connections, scan QR codes, send test messages, and view API docs directly from the browser.
+- 🔄 **Auto-Reconnect** — Connection automatically restores if disconnected.
+- 💾 **Persistent Session** — Session is saved on disk, no need to rescan the QR code on every restart.
+- 📱 **Smart Number Format** — Automatically formats local numbers to international format.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Komponen | Teknologi | Keterangan |
+| Component | Technology | Description |
 |---|---|---|
 | **Runtime** | [Node.js](https://nodejs.org/) ≥ 18 | JavaScript runtime |
-| **Framework** | [NestJS](https://nestjs.com/) v11 | Backend framework modular & scalable |
-| **Language** | [TypeScript](https://www.typescriptlang.org/) 5.x | Static typing untuk JavaScript |
+| **Framework** | [NestJS](https://nestjs.com/) v11 | Modular & scalable backend framework |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) 5.x | Static typing for JavaScript |
 | **WhatsApp Client** | [@whiskeysockets/baileys](https://github.com/WhiskeySockets/Baileys) v7 | WhatsApp Web API (Multi-Device) |
-| **QR Code** | [qrcode](https://www.npmjs.com/package/qrcode) | Generate QR code sebagai base64 Data URL |
+| **QR Code** | [qrcode](https://www.npmjs.com/package/qrcode) | Generate QR codes as base64 Data URLs |
 | **Logger** | [Pino](https://getpino.io/) | High-performance JSON logger |
 | **Validation** | [class-validator](https://github.com/typestack/class-validator) + [class-transformer](https://github.com/typestack/class-transformer) | DTO request validation |
 | **Config** | [@nestjs/config](https://docs.nestjs.com/techniques/configuration) | Environment variable management |
-| **Static Files** | [@nestjs/serve-static](https://docs.nestjs.com/recipes/serve-static) | Serve web dashboard |
+| **Static Files** | [@nestjs/serve-static](https://docs.nestjs.com/recipes/serve-static) | Serve the web dashboard |
 | **Linting** | [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/) | Code formatting & linting |
 | **Testing** | [Jest](https://jestjs.io/) + [Supertest](https://github.com/ladjs/supertest) | Unit & e2e testing |
 
@@ -59,10 +59,10 @@ Microservice ini menggunakan protokol **WhatsApp Multi-Device** melalui library 
 ### Prerequisites
 
 - **Node.js** ≥ 18 ([download](https://nodejs.org/))
-- **npm** ≥ 9 (sudah termasuk dengan Node.js)
-- Akun **WhatsApp** aktif di smartphone
+- **npm** ≥ 9 (bundled with Node.js)
+- Active **WhatsApp** account on your smartphone
 
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/jojixyz666/WhatsappNotify-API.git
@@ -75,9 +75,9 @@ cd WhatsappNotify-API
 npm install
 ```
 
-### 3. Konfigurasi Environment
+### 3. Configure the Environment
 
-Salin file `.env.example` atau buat file `.env` di root project:
+Copy the `.env.example` file or create a `.env` file in the project root:
 
 ```env
 PORT=3000
@@ -86,17 +86,17 @@ DEFAULT_COUNTRY_CODE=62
 DEFAULT_RECIPIENT=
 ```
 
-| Variable | Default | Keterangan |
+| Variable | Default | Description |
 |---|---|---|
-| `PORT` | `3000` | Port server |
-| `WHATSAPP_SESSION_DIR` | `sessions` | Direktori penyimpanan session WhatsApp |
-| `DEFAULT_COUNTRY_CODE` | `62` | Kode negara default (62 = Indonesia) |
-| `DEFAULT_RECIPIENT` | _(kosong)_ | Nomor tujuan default untuk webhook & GET send (opsional) |
+| `PORT` | `3000` | Server port |
+| `WHATSAPP_SESSION_DIR` | `sessions` | Directory where WhatsApp sessions are stored |
+| `DEFAULT_COUNTRY_CODE` | `62` | Default country code (62 = Indonesia) |
+| `DEFAULT_RECIPIENT` | _(empty)_ | Default recipient phone number for webhooks & GET sends (optional) |
 
-### 4. Jalankan Server
+### 4. Run the Server
 
 ```bash
-# Development (auto-reload)
+# Development (with auto-reload)
 npm run start:dev
 
 # Production
@@ -104,17 +104,17 @@ npm run build
 npm run start:prod
 ```
 
-### 5. Scan QR Code
+### 5. Scan the QR Code
 
-Setelah server berjalan:
+Once the server is running:
 
-1. Buka browser → `http://localhost:3000`
-2. Atau lihat QR code di terminal
-3. Buka **WhatsApp** di HP → **Linked Devices** → **Link a Device**
-4. Scan QR code
-5. Status berubah menjadi **Connected** ✅
+1. Open your browser and go to → `http://localhost:3000`
+2. Or view the QR code in the terminal
+3. Open **WhatsApp** on your phone → **Linked Devices** → **Link a Device**
+4. Scan the QR code
+5. Status changes to **Connected** ✅
 
-> **Catatan:** Session tersimpan di folder `sessions/`. Selama folder ini tidak dihapus, kamu tidak perlu scan QR lagi setelah restart server.
+> **Note:** The session is saved in the `sessions/` folder. As long as this folder is not deleted, you do not need to scan the QR code again after restarting the server.
 
 ---
 
@@ -122,7 +122,7 @@ Setelah server berjalan:
 
 Base URL: `http://localhost:3000`
 
-### Cek Status Koneksi
+### Check Connection Status
 
 ```http
 GET /api/whatsapp/status
@@ -136,11 +136,11 @@ GET /api/whatsapp/status
 }
 ```
 
-Status yang mungkin: `CONNECTED`, `CONNECTING`, `DISCONNECTED`, `SCAN_QR`
+Possible statuses: `CONNECTED`, `CONNECTING`, `DISCONNECTED`, `SCAN_QR`
 
 ---
 
-### Kirim Pesan (POST)
+### Send Message (POST)
 
 ```http
 POST /api/whatsapp/send
@@ -170,18 +170,18 @@ Content-Type: application/json
 
 ---
 
-### Kirim Pesan (GET)
+### Send Message (GET)
 
 ```http
 GET /api/whatsapp/send?to=628123456789&message=Hello+World
 ```
 
-Cocok untuk integrasi sederhana, browser redirect, atau webhook tanpa body.
+Suitable for simple integrations, browser redirects, or webhooks without a body.
 
-| Parameter | Wajib | Keterangan |
+| Parameter | Required | Description |
 |---|---|---|
-| `to` | Tidak* | Nomor tujuan. Jika kosong, gunakan `DEFAULT_RECIPIENT` dari `.env` |
-| `message` atau `msg` | Ya | Isi pesan |
+| `to` | No* | Recipient number. If empty, uses `DEFAULT_RECIPIENT` from `.env` |
+| `message` or `msg` | Yes | Message body |
 
 ---
 
@@ -192,15 +192,15 @@ POST /api/whatsapp/webhook?to=628123456789
 Content-Type: application/json
 ```
 
-Endpoint ini otomatis mem-parsing payload dari berbagai sistem monitoring. Mendukung body keys:
+This endpoint automatically parses payloads from various monitoring systems. Supports the following body keys:
 
-- `message`, `msg`, `text`, `body`, `content` — untuk isi pesan
-- `to`, `phone`, `number` — untuk nomor tujuan
-- `title` — digabung dengan `message` jika ada
+- `message`, `msg`, `text`, `body`, `content` — for message content
+- `to`, `phone`, `number` — for recipient number
+- `title` — combined with the message if present
 
-Jika `to` tidak ditemukan di body maupun query, akan fallback ke `DEFAULT_RECIPIENT`.
+If `to` is not found in either the body or the query, it falls back to `DEFAULT_RECIPIENT`.
 
-**Contoh: Uptime Kuma**
+**Example: Uptime Kuma**
 ```json
 {
   "msg": "🔴 Server Production DOWN!",
@@ -208,7 +208,7 @@ Jika `to` tidak ditemukan di body maupun query, akan fallback ke `DEFAULT_RECIPI
 }
 ```
 
-**Contoh: Grafana Alert**
+**Example: Grafana Alert**
 ```json
 {
   "title": "High CPU Usage",
@@ -218,13 +218,13 @@ Jika `to` tidak ditemukan di body maupun query, akan fallback ke `DEFAULT_RECIPI
 
 ---
 
-### Ambil QR Code
+### Retrieve QR Code
 
 ```http
 GET /api/whatsapp/qr
 ```
 
-**Response (saat status SCAN_QR):**
+**Response (when status is SCAN_QR):**
 ```json
 {
   "qr": "data:image/png;base64,..."
@@ -239,21 +239,21 @@ GET /api/whatsapp/qr
 POST /api/whatsapp/logout
 ```
 
-Menghapus session dan memulai ulang flow koneksi (QR baru akan di-generate).
+Clears the session and restarts the connection flow (a new QR code will be generated).
 
 ---
 
 ## 🖥️ Web Dashboard
 
-Akses dashboard di `http://localhost:3000` setelah server berjalan.
+Access the dashboard at `http://localhost:3000` after the server starts.
 
-| Tab | Fungsi |
+| Tab | Function |
 |---|---|
-| **Dashboard** | Status koneksi real-time, QR code display, session metrics, tombol disconnect |
-| **Test Console** | Form kirim pesan test dengan activity log |
-| **API Reference** | Dokumentasi endpoint lengkap dengan contoh payload |
+| **Dashboard** | Real-time connection status, QR code display, session metrics, disconnect button |
+| **Test Console** | Form to send test messages with an activity log |
+| **API Reference** | Complete endpoint documentation with payload examples |
 
-Dashboard menggunakan dark theme dengan auto-polling (status setiap 3 detik, QR setiap 5 detik).
+The dashboard uses a dark theme with auto-polling (status every 3 seconds, QR every 5 seconds).
 
 ---
 
@@ -289,33 +289,33 @@ WhatsappNotify-API/
 
 ## 📜 Scripts
 
-| Command | Keterangan |
+| Command | Description |
 |---|---|
-| `npm run start` | Jalankan server |
-| `npm run start:dev` | Jalankan server dengan auto-reload (watch mode) |
-| `npm run start:debug` | Jalankan server dengan debugger |
-| `npm run start:prod` | Jalankan build production |
-| `npm run build` | Compile TypeScript ke JavaScript |
-| `npm run lint` | Jalankan ESLint |
-| `npm run format` | Format kode dengan Prettier |
-| `npm run test` | Jalankan unit tests |
-| `npm run test:e2e` | Jalankan end-to-end tests |
-| `npm run test:cov` | Jalankan tests dengan coverage report |
+| `npm run start` | Start the server |
+| `npm run start:dev` | Start the server with auto-reload (watch mode) |
+| `npm run start:debug` | Start the server in debug mode |
+| `npm run start:prod` | Run the compiled production build |
+| `npm run build` | Compile TypeScript to JavaScript |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format code with Prettier |
+| `npm run test` | Run unit tests |
+| `npm run test:e2e` | Run end-to-end tests |
+| `npm run test:cov` | Run tests and generate coverage report |
 
 ---
 
-## 🤝 Integrasi
+## 🤝 Integration
 
-WA-Notify dirancang untuk mudah diintegrasikan dengan berbagai sistem:
+WA-Notify is designed to be easily integrated with various systems:
 
-- **Uptime Kuma** — Tambahkan notification type "Webhook" dengan URL `http://server:3000/api/whatsapp/webhook?to=628xxx`
-- **Grafana** — Gunakan contact point "Webhook" ke endpoint webhook
-- **Netdata** — Konfigurasi alarm notification via webhook
-- **Cron Job** — Panggil endpoint GET dari crontab: `curl "http://localhost:3000/api/whatsapp/send?to=628xxx&msg=Backup+selesai"`
-- **Custom App** — HTTP POST ke `/api/whatsapp/send` dari bahasa pemrograman apapun
+- **Uptime Kuma** — Add a "Webhook" notification type with URL `http://server:3000/api/whatsapp/webhook?to=628xxx`
+- **Grafana** — Use a "Webhook" contact point pointing to the webhook endpoint
+- **Netdata** — Configure alarm notifications via webhook
+- **Cron Job** — Call the GET endpoint from a crontab: `curl "http://localhost:3000/api/whatsapp/send?to=628xxx&msg=Backup+completed"`
+- **Custom App** — Send an HTTP POST to `/api/whatsapp/send` from any programming language
 
 ---
 
 ## ⚠️ Disclaimer
 
-Project ini menggunakan library tidak resmi untuk berkomunikasi dengan WhatsApp. Penggunaan di luar ketentuan layanan WhatsApp menjadi tanggung jawab pengguna. Disarankan untuk menggunakan akun WhatsApp yang didedikasikan khusus untuk notifikasi.
+This project uses an unofficial library to communicate with WhatsApp. Any usage beyond WhatsApp's Terms of Service is the user's responsibility. It is recommended to use a dedicated WhatsApp account specifically for notifications.
